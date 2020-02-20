@@ -1,12 +1,14 @@
-use std::net::UdpSocket;
+use std::net::{UdpSocket, SocketAddr};
 use json;
 use std::fs::File;
-use std::io::{self, BufRead};
+use std::io::{self, BufRead, Write, Error};
 use chrono::{NaiveDateTime, Duration};
 use std::thread;
 use getopts::Options;
 use std::env;
 use std::process::exit;
+use std::sync::mpsc;
+use std::sync::mpsc::TryRecvError;
 
 fn parse_args() -> (String, String, String) {
     // Set default values
@@ -78,13 +80,44 @@ fn main() -> std::io::Result<()> {
             old_time = Some(parsed_time);
         }
 
-        let socket = UdpSocket::bind(format!("127.0.0.1:{}", args.1))?;
+        let socket = UdpSocket::bind(format!("127.0.0.1:{}", args.2))?;
+
+        let socket_clone = socket.try_clone().unwrap();
+
+        let (tx, rx) = mpsc::channel();
+
+        let recv_thread = thread::spawn(move || {
+            let mut out_file = File::create("out.json").unwrap();
+            let mut buf = [0; 256];
+
+            socket_clone.set_read_timeout(Some(std::time::Duration::from_secs(10))).unwrap();
+
+            loop {
+                if let Ok(i) = socket_clone.recv_from(&mut buf) {
+                    if i.0 == 256 {
+                        println!("Received {} bytes, probably lost some...", i.0);
+                    }
+
+                    println!("{:?}", &buf[..i.0]);
+
+                    out_file.write_all(&buf[..i.0]);
+                }
+
+                if let Ok(_) = rx.try_recv() {
+                    return
+                }
+            }
+        });
 
         for event in event_vec {
             thread::sleep(event.1.to_std().unwrap());
             println!("{}", event.0);
-            socket.send_to(event.0.as_bytes(), format!("127.0.0.1:{}", args.2))?;
+            socket.send_to(event.0.as_bytes(), format!("127.0.0.1:{}", args.1))?;
         }
+
+        tx.send(true).unwrap();
+
+        recv_thread.join().unwrap();
     }
     Ok(())
 }
