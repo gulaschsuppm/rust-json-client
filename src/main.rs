@@ -9,13 +9,13 @@ fn main() -> std::io::Result<()> {
     {
         let args: Vec<String> = env::args().collect();
 
-        let args = input_parser::parse_args(args);
+        let (path, port) = input_parser::parse_args(&args);
 
-        println!("Parsing {}, sending events to port {} and receiving at port {}", args.0, args.1, args.2);
+        println!("Sending events from {} to 127.0.0.1:{}", &path, &port);
 
-        let json_events = scenario_parser::json_to_event_vector(&args.0)?;
+        let json_events = scenario_parser::json_to_event_vector(&path)?;
 
-        net_client::run(args.2, args.1, json_events).unwrap();
+        net_client::run(&port, &json_events).unwrap();
     }
     Ok(())
 }

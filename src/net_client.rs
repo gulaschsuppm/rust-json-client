@@ -1,14 +1,14 @@
 use chrono::Duration;
-use std::net::UdpSocket;
+use std::net::{TcpListener, SocketAddr, TcpStream};
 use std::sync::mpsc;
 use std::thread;
 use std::fs::File;
-use std::io::{self, Write};
+use std::io::{self, Write, Read};
 
-pub fn run(iport: String, oport: String, events: Vec<(String, Duration)>) -> io::Result<()> {
-    let socket = UdpSocket::bind(format!("127.0.0.1:{}", iport))?;
+pub fn run(iport: &String, events: &Vec<(String, Duration)>) -> io::Result<()> {
+    let (mut socket, _) = connect_tcp(&iport)?;
 
-    let socket_clone = socket.try_clone().unwrap();
+    let mut socket_clone = socket.try_clone()?;
 
     let (tx, rx) = mpsc::channel();
 
@@ -19,14 +19,14 @@ pub fn run(iport: String, oport: String, events: Vec<(String, Duration)>) -> io:
         socket_clone.set_read_timeout(Some(std::time::Duration::from_secs(10))).unwrap();
 
         loop {
-            if let Ok(i) = socket_clone.recv_from(&mut buf) {
-                if i.0 == 256 {
-                    println!("Received {} bytes, probably lost some...", i.0);
+            if let Ok(i) = socket_clone.read(&mut buf) {
+                if i == 256 {
+                    println!("Received {} bytes, probably lost some...", i);
                 }
 
-                println!("Received: {:?}", &buf[..i.0]);
+                println!("Received: {:?}", &buf[..i]);
 
-                out_file.write_all(&buf[..i.0]).unwrap();
+                out_file.write_all(&buf[..i]).unwrap();
             }
 
             if let Ok(_) = rx.try_recv() {
@@ -38,13 +38,20 @@ pub fn run(iport: String, oport: String, events: Vec<(String, Duration)>) -> io:
     for event in events {
         thread::sleep(event.1.to_std().unwrap());
         println!("Sending: {}", event.0);
-        socket.send_to(event.0.as_bytes(), format!("127.0.0.1:{}", oport))?;
+        socket.write(event.0.as_bytes())?;
     }
     tx.send(true).unwrap();
 
     recv_thread.join().unwrap();
 
     Ok(())
+}
+
+/// Will block
+fn connect_tcp(iport: &String) -> io::Result<(TcpStream, SocketAddr)> {
+    let listener = TcpListener::bind(format!("127.0.0.1:{}", iport))?;
+
+    listener.accept()
 }
 
 
