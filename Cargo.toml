@@ -11,3 +11,7 @@ json = "0.12.1"
 chrono = "0.4.10"
 timer = "0.2.0"
 getopts = "0.2"
+
+[badges]
+travis-ci = { repository = "gulaschsuppm/rust-json-client", branch = "master" }
+codecov = { repository = "gulaschsuppm/rust-json-client", branch = "master", service = "github" }
