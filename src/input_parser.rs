@@ -64,4 +64,23 @@ mod tests {
         assert_eq!(iport, "34254");
         assert_eq!(oport, "4242");
     }
+
+    #[test]
+    fn args_received() {
+        let args = vec![
+            String::from("self"),
+            String::from("-f"),
+            String::from("file.json"),
+            String::from("-i"),
+            String::from("1111"),
+            String::from("-o"),
+            String::from("2222")
+        ];
+
+        let (file, oport, iport) = parse_args(args);
+
+        assert_eq!(file,  "file.json");
+        assert_eq!(iport, "1111");
+        assert_eq!(oport, "2222");
+    }
 }
