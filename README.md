@@ -1,0 +1,2 @@
+[![Travis CI](https://travis-ci.com/gulaschsuppm/rust-json-client.svg?branch=master)](https://travis-ci.com/gulaschsuppm/rust-json-client)
+[![CodeCov](https://codecov.io/gh/gulaschsuppm/rust-json-client/branch/master/graph/badge.svg)](https://codecov.io/gh/gulaschsuppm/rust-json-client/branch/master)
