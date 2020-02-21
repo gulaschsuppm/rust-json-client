@@ -46,3 +46,34 @@ pub fn run(iport: String, oport: String, events: Vec<(String, Duration)>) -> io:
 
     Ok(())
 }
+
+
+#[cfg(test)]
+mod run {
+    // use super::*;
+    //
+    // #[test]
+    // fn port_not_open() {
+    //     let events: Vec<(String, Duration)> = Vec::new();
+    //
+    //     // Go for 443 (HTTPS) but no guarantee...
+    //     let res = run(String::from("443"), String::from("4242"), events);
+    //
+    //     assert!(res.is_err());
+    // }
+    //
+    // #[test]
+    // fn receive_event() {
+    //     let first_string = String::from("First message");
+    //     let second_string = String::from("Second message");
+    //     let events: Vec<(String, Duration)> = vec![(first_string.clone(), Duration::seconds(0)), (second_string.clone(), Duration::seconds(0))];
+    //
+    //     let test_socket = UdpSocket::bind("127.0.0.1:4242").unwrap();
+    //
+    //     let res = run(String::from("4343"), String::from("4242"), events);
+    //
+    //     let first_msg =
+    //
+    //     assert!(res.is_err());
+    // }
+}

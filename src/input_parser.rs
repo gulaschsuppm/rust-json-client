@@ -43,7 +43,7 @@ pub fn parse_args(args: Vec<String>) -> (String, String, String) {
 
 
 #[cfg(test)]
-mod tests {
+mod parse_args {
     use super::*;
 
     #[test]
