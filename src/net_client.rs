@@ -143,6 +143,9 @@ mod run {
         std::thread::sleep(std::time::Duration::from_secs(2));
         let mut tcp_socket = TcpStream::connect(format!("127.0.0.1:{}", port)).unwrap();
 
+        // Wait for the messages to be definitely sent
+        std::thread::sleep(std::time::Duration::from_secs(5));
+
         let mut buf = [0_u8; 1024];
         let size = tcp_socket.read(&mut buf).unwrap();
 
